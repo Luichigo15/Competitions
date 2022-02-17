@@ -24,19 +24,19 @@ class Solution {
     ];
 
     final data =
-        await readFile('${Directory.current.path}/$directory/${examples[4]}');
+        await readFile('${Directory.current.path}/$directory/${examples[2]}');
 
-    final result = makePizzaV3(data);
+    final result = makePizzaV2(data);
 
     print(result);
-    writeFile(result, '${Directory.current.path}/$directory/result5.txt');
+    writeFile(result, '${Directory.current.path}/$directory/result3.txt');
   }
 
   String makePizza(List<String> data) {
     List<String> likes = [];
     List<String> dislikes = [];
 
-    for (var i = 1; i <= int.parse(data[0]) * 2 +1; i++) {
+    for (var i = 1; i <= int.parse(data[0]) * 2; i++) {
       if (i % 2 != 0) {
         likes.addAll(List.from(data[i].split(' ').sublist(1)));
       } else {
