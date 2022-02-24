@@ -1,7 +1,7 @@
 import 'dart:io';
 
 class Solution{
-  void init(){
+  void init() async{
     final directory = 'input_data';
     final examples = [
       'a_an_example.in.txt',
@@ -11,6 +11,28 @@ class Solution{
       'e_exceptional_skills.in.txt',
       'f_find_great_mentors.in.txt'
     ];
+
+    final data =
+        await readFile('${Directory.current.path}/$directory/${examples[0]}');
+
+    List<Contributors> contributors = [];
+    List<Project> projects = [];
+
+    final totalData = data[0].split(' ');
+
+    for (var i = 1; i < int.parse(totalData[0]); i++) {
+      final dataCont = data[i].split(' ');
+      List<Skill> skills = [];
+      for (var j = i+1; j < int.parse(dataCont[1]); j++) {
+        final dataSkill = data[j].split(' ');
+        skills.add(Skill(dataSkill[0], int.parse(dataSkill[1])));
+      }
+      contributors.add(Contributors(dataCont[0], skills));
+    }
+
+    for (var i = 0; i < count; i++) {
+      
+    }
   }
 
   Future<List<String>> readFile(String path) async {
@@ -35,6 +57,13 @@ class Skill{
   int level;
 
   Skill(this.name,this.level);
+
+  String toString() {
+    return {
+      'name':this.name,
+      'level':this.level
+    }.toString();
+  }
 }
 
 class Project{
