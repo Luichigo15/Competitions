@@ -1,7 +1,7 @@
 import 'dart:io';
 
-class Solution{
-  void init() async{
+class Solution {
+  void init() async {
     final directory = 'input_data';
     final examples = [
       'a_an_example.in.txt',
@@ -13,7 +13,7 @@ class Solution{
     ];
 
     final data =
-        await readFile('${Directory.current.path}/$directory/${examples[1]}');
+        await readFile('${Directory.current.path}/$directory/${examples[5]}');
 
     List<Contributors> contributors = [];
     List<Project> projects = [];
@@ -42,73 +42,139 @@ class Solution{
         skills.add(Skill(dataSkill[0], int.parse(dataSkill[1])));
         line++;
       }
-      projects.add(
-        Project(
-          dataCont[0],
-          int.parse(dataCont[1]),
-          int.parse(dataCont[2]),
-          int.parse(dataCont[3]),
-          skills,
-        ));
+      projects.add(Project(
+        dataCont[0],
+        int.parse(dataCont[1]),
+        int.parse(dataCont[2]),
+        int.parse(dataCont[3]),
+        skills,
+      ));
     }
 
-    projects.sort((element1,element2)=>element1.roles.length.compareTo(element2.roles.length));
-
-    final resultData = calculateData(contributors, projects);
+    // calculateDataV2(contributors,projects);
+    final resultData = calculateDataV2(contributors, projects);
     print(resultData);
-    writeFile(resultData, '${Directory.current.path}/$directory/result1.txt');
+    writeFile(resultData, '${Directory.current.path}/$directory/result5.txt');
   }
 
-  String calculateData(List<Contributors> cont,List<Project> projects){
+  String calculateDataV2(List<Contributors> cont, List<Project> projects){
+    List<Project> projectsFinal = [];
+
+    projects.forEach((project) { 
+      if(project.roles.length==1){
+        project.roles.forEach((rol) {
+          final list = cont.where((contri) => contri.skill
+                    .where((skill) =>
+                        skill.name == rol.name &&
+                        skill.level >= rol.level)
+                    .length >
+                0).toList();
+
+          for (var j = 0; j < list.length; j++) {
+            if (project.contributors.contains(list[j])) continue;
+            project.contributors.add(list[j]);
+            break;
+          }
+        });
+
+        if (project.contributors.length == project.roles.length) {
+          project.isFullRoles = true;
+          project.contributors.forEach((element) {
+            cont[cont.indexOf(element)].skill.forEach((skill) {
+              skill.level++;
+            });
+          });
+          projectsFinal.add(project);
+        }
+      }
+    });
+
+    String result = '${projectsFinal.length}\n';
+    for (var i = 0; i < projectsFinal.length; i++) {
+      final element = projectsFinal[i];
+      result += '${element.name}\n';
+      String names = '';
+      element.contributors.forEach((contri) {
+        if (names.isEmpty) {
+          names += '${contri.name}';
+        } else {
+          names += ' ${contri.name}';
+        }
+      });
+
+      if (i == projectsFinal.length - 1) {
+        result += '$names';
+      } else {
+        result += '$names\n';
+      }
+    }
+
+    return result;
+  }
+
+  String calculateData(List<Contributors> cont, List<Project> projects) {
     int k = 0;
     List<Project> projectsFinal = [];
-    while(projects.where((element) => !element.isFullRoles).length>0){
-      if(k>=projects.length) k=0;
+    int totalProjects = 0;
+    while (projects.where((element) => !element.isFullRoles).length > 0) {
+      if (k >= projects.length) k = 0;
       final project = projects[k];
+      if (projectsFinal.contains(project)) {
+        k++;
+        continue;
+      }
       for (var i = 0; i < project.roles.length; i++) {
-        final list = cont.where(
-          (contri) => contri.skill.where(
-            (skill) => skill.name == project.roles[i].name && skill.level >= project.roles[i].level).length>0).toList();
-
-        if(list.length==0) continue;
+        final list = cont
+            .where((contri) =>
+                contri.skill
+                    .where((skill) =>
+                        skill.name == project.roles[i].name &&
+                        skill.level >= project.roles[i].level)
+                    .length >
+                0)
+            .toList();
 
         for (var j = 0; j < list.length; j++) {
-          if(project.contributors.contains(list[j])) continue;
+          if (project.contributors.contains(list[j])) continue;
           project.contributors.add(list[j]);
           break;
         }
+
       }
 
-      if(project.contributors.length==project.roles.length){
+      if (project.contributors.length == project.roles.length) {
         project.isFullRoles = true;
         project.contributors.forEach((element) {
-          cont[cont.indexOf(element)].skill.forEach((skill) {skill.level++; });
+          cont[cont.indexOf(element)].skill.forEach((skill) {
+            skill.level++;
+          });
         });
         projectsFinal.add(project);
+        totalProjects++;
       }
+
+      print(totalProjects);
       k++;
     }
 
     String result = '${projectsFinal.length}\n';
     for (var i = 0; i < projectsFinal.length; i++) {
       final element = projectsFinal[i];
-      result+='${element.name}\n';
+      result += '${element.name}\n';
       String names = '';
       element.contributors.forEach((contri) {
-        if(names.isEmpty){
-          names+= '${contri.name}';
-        }else{
-          names+= ' ${contri.name}';
+        if (names.isEmpty) {
+          names += '${contri.name}';
+        } else {
+          names += ' ${contri.name}';
         }
-        
       });
 
-      if(i==projectsFinal.length-1){
-        result+='$names';
-      }else{
-        result+='$names\n';
+      if (i == projectsFinal.length - 1) {
+        result += '$names';
+      } else {
+        result += '$names\n';
       }
-      
     }
 
     return result;
@@ -131,21 +197,18 @@ void main() {
   solution.init();
 }
 
-class Skill{
+class Skill {
   String name;
   int level;
 
-  Skill(this.name,this.level);
+  Skill(this.name, this.level);
 
   String toString() {
-    return {
-      'name':this.name,
-      'level':this.level
-    }.toString();
+    return {'name': this.name, 'level': this.level}.toString();
   }
 }
 
-class Project{
+class Project {
   String name;
   int days;
   int score;
@@ -154,35 +217,27 @@ class Project{
   List<Contributors> contributors = [];
   bool isFullRoles = false;
 
-  Project(this.name,
-  this.days,
-  this.score,
-  this.bestDay,
-  this.roles);
+  Project(this.name, this.days, this.score, this.bestDay, this.roles);
 
   String toString() {
-      return {
-        'name':this.name,
-        'days':this.days,
-        'score':this.score,
-        'bestDay':this.bestDay,
-        'roles':this.roles.toString(),
-        'contributors':this.contributors.toString()
-      }.toString();
-    }
+    return {
+      'name': this.name,
+      'days': this.days,
+      'score': this.score,
+      'bestDay': this.bestDay,
+      'roles': this.roles.toString(),
+      'contributors': this.contributors.toString()
+    }.toString();
+  }
 }
 
-class Contributors{
+class Contributors {
   String name;
   List<Skill> skill;
 
-  Contributors(this.name,this.skill);
+  Contributors(this.name, this.skill);
 
-  String toString() {     
-     
-      return {
-        'name':this.name,
-        'skills':this.skill.toString()
-      }.toString();
-    }
+  String toString() {
+    return {'name': this.name, 'skills': this.skill.toString()}.toString();
+  }
 }
