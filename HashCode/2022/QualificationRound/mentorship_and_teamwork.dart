@@ -19,20 +19,41 @@ class Solution{
     List<Project> projects = [];
 
     final totalData = data[0].split(' ');
+    int line = 1;
 
-    for (var i = 1; i < int.parse(totalData[0]); i++) {
-      final dataCont = data[i].split(' ');
+    for (var i = 0; i < int.parse(totalData[0]); i++) {
+      final dataCont = data[line].split(' ');
+      line++;
       List<Skill> skills = [];
-      for (var j = i+1; j < int.parse(dataCont[1]); j++) {
-        final dataSkill = data[j].split(' ');
+      for (var j = 0; j < int.parse(dataCont[1]); j++) {
+        final dataSkill = data[line].split(' ');
         skills.add(Skill(dataSkill[0], int.parse(dataSkill[1])));
+        line++;
       }
       contributors.add(Contributors(dataCont[0], skills));
     }
 
-    for (var i = 0; i < count; i++) {
-      
+    for (var i = 0; i < int.parse(totalData[1]); i++) {
+      final dataCont = data[line].split(' ');
+      line++;
+      List<Skill> skills = [];
+      for (var j = 0; j < int.parse(dataCont[4]); j++) {
+        final dataSkill = data[line].split(' ');
+        skills.add(Skill(dataSkill[0], int.parse(dataSkill[1])));
+        line++;
+      }
+      projects.add(
+        Project(
+          dataCont[0],
+          int.parse(dataCont[1]),
+          int.parse(dataCont[2]),
+          int.parse(dataCont[3]),
+          skills,
+        ));
     }
+
+    print(contributors);
+    print(projects);
   }
 
   Future<List<String>> readFile(String path) async {
@@ -78,6 +99,16 @@ class Project{
   this.score,
   this.bestDay,
   this.roles);
+
+  String toString() {
+      return {
+        'name':this.name,
+        'days':this.days,
+        'score':this.score,
+        'bestDay':this.bestDay,
+        'roles':this.roles.toString(),
+      }.toString();
+    }
 }
 
 class Contributors{
@@ -85,4 +116,12 @@ class Contributors{
   List<Skill> skill;
 
   Contributors(this.name,this.skill);
+
+  String toString() {     
+     
+      return {
+        'name':this.name,
+        'skills':this.skill.toString()
+      }.toString();
+    }
 }
